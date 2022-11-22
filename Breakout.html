@@ -45,7 +45,7 @@
       }
     }
 
-    function drawBall() {
+    const drawBall = () => {
       ctx.beginPath();
       ctx.arc(x, y, ballR, 0, Math.PI * 2);
       ctx.fillStyle = ballColor;
@@ -53,7 +53,7 @@
       ctx.closePath();
     }
 
-    function drawPong() {
+    const drawPong = () => {
       ctx.beginPath();
       ctx.rect(pongX, canvas.height - pongH, pongW, pongH);
       ctx.fillStyle = pongColor;
@@ -61,8 +61,8 @@
       ctx.closePath();
     }
 
-    function drawBricks() {
-      bricks.forEach(function (bricks) {
+    const drawBricks = () => {
+      bricks.forEach((bricks) => {
         if (!bricks.status) return;
 
         ctx.beginPath();
@@ -73,12 +73,11 @@
       });
     }
 
-    function collisionDetection() {
-      bricks.forEach(b => {
-        if (!b.status) { return; }
-
-        let inBricksColumn = x > b.x && x < b.x + brickW,
-          inBricksRow = y > b.y && y < b.y + brickH;
+    const collisionDetection = () => {
+      bricks.forEach((b) => {
+        if (!b.status) return;
+        
+        let inBricksColumn = x > b.x && x < b.x + brickW, inBricksRow = y > b.y && y < b.y + brickH;
 
         if (inBricksColumn && inBricksRow) {
           dy = -dy;
@@ -86,74 +85,47 @@
         }
       });
     }
-    function draw() {
+    const draw = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       drawBricks();
       drawBall();
       drawPong();
       collisionDetection();
 
-      if (hitSideWall()) {
-        dx = -dx;
-      }
+      const hitBottom = () => { return y + dy > canvas.height - ballR; }
 
-      if (hitTop() || hitPong()) {
-        dy = -dy;
-      }
+      const ballOverPong = () => { return x > pongX && x < pongX + pongW; }
 
-      if (gameOver()) {
-        document.location.reload(); // TODO: Something that won't reload the entire page...
-      }
+      const hitPong = () => { return hitBottom() && ballOverPong(); }
 
-      function hitBottom() {
-        return y + dy > canvas.height - ballR;
-      }
+      const gameOver = () => { return hitBottom() && !ballOverPong(); }
 
-      function ballOverPong() {
-        return x > pongX && x < pongX + pongW;
-      }
+      const hitSideWall = () => { return x + dx > canvas.width - ballR || x + dx < ballR; }
 
-      function hitPong() {
-        return hitBottom() && ballOverPong();
-      }
+      const hitTop = () => { return y + dy < ballR; }
 
-      function gameOver() {
-        return hitBottom() && !ballOverPong();
-      }
+      const xOutOfBounds = () => { return x + dx > canvas.width - ballR || x + dx < ballR; }
 
-      function hitSideWall() {
-        return x + dx > canvas.width - ballR ||
-          x + dx < ballR;
-      }
+      const rightPressed = (e) => { return e.keyCode === RIGHT_ARROW; }
 
-      function hitTop() {
-        return y + dy < ballR;
-      }
+      const leftPressed = (e) => { return e.keyCode === LEFT_ARROW; }
+      
+      if (hitSideWall()) dx = -dx;
 
-      function xOutOfBounds() {
-        return x + dx > canvas.width - ballR ||
-          x + dx < ballR;
-      }
+      if (hitTop() || hitPong()) dy = -dy;
 
-      function rightPressed(e) {
-        return e.keyCode === RIGHT_ARROW;
-      }
+      if (gameOver()) document.location.reload(); // TODO: Something that won't reload the entire page }
 
-      function leftPressed(e) {
-        return e.keyCode === LEFT_ARROW;
-      }
-
-      document.addEventListener("keydown", e => {
+      document.addEventListener("keydown", (e) => {
         rightKey = rightPressed(e);
         leftKey = leftPressed(e);
       });
-      document.addEventListener("keyup", e => {
+      document.addEventListener("keyup", (e) => {
         rightKey = rightPressed(e) ? false : rightKey;
         leftKey = leftPressed(e) ? false : leftKey;
       });
 
-      let maxX = canvas.width - pongW, minX = 0,
-        pongDelta = rightKey ? 7 : leftKey ? -7 : 0;
+      let maxX = canvas.width - pongW, minX = 0, pongDelta = rightKey ? 7 : leftKey ? -7 : 0;
 
       pongX = pongX + pongDelta;
       pongX = Math.min(pongX, maxX);
